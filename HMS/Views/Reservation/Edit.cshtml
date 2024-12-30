@@ -1,0 +1,113 @@
+﻿@model HMS.ViewModel.ReservationViewModel
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Reservation</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Id" class="control-label"></label>
+                <input readonly asp-for="Id" class="form-control" id="CheckIn" />
+                <span asp-validation-for="Id" class="text-danger"></span>
+            </div>
+            <!-- Room Selection -->
+
+            <div class="form-group">
+                <label asp-for="RoomId" class="control-label"></label>
+                <select asp-for="RoomId" class="form-control" id="RoomId">
+                    <option value="">-- Select Room --</option>
+                    @foreach (var item in Model.AvailableRoom)
+                    {
+                        <option value="@item.ID" data-price="@item.PricePerNight">@item.RoomNumber</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Customer Selection -->
+            <div class="form-group">
+                <label asp-for="CustomerId" class="control-label"></label>
+                <select asp-for="CustomerId" class="form-control">
+                    <option value="">-- Select Customer --</option>
+                    @foreach (var item in Model.Customer)
+                    {
+                        <option value="@item.ID">@item.Name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Check-In Date -->
+            <div class="form-group">
+                <label asp-for="CheckIn" class="control-label"></label>
+                <input asp-for="CheckIn" class="form-control" id="CheckIn" />
+                <span asp-validation-for="CheckIn" class="text-danger"></span>
+            </div>
+
+            <!-- Check-Out Date -->
+            <div class="form-group">
+                <label asp-for="CheckOut" class="control-label"></label>
+                <input asp-for="CheckOut" class="form-control" id="CheckOut" />
+                <span asp-validation-for="CheckOut" class="text-danger"></span>
+            </div>
+
+            <!-- Total Price -->
+            <div class="form-group">
+                <label asp-for="TotalPrice" class="control-label"></label>
+                <input readonly asp-for="TotalPrice" class="form-control" id="TotalPrice" />
+                <span asp-validation-for="TotalPrice" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Edit" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function calculateTotalPrice() {
+            var checkIn = document.getElementById("CheckIn").value;
+            var checkOut = document.getElementById("CheckOut").value;
+            var roomSelect = document.getElementById("RoomId");
+            var selectedRoom = roomSelect.options[roomSelect.selectedIndex];
+            var price = parseFloat(selectedRoom.getAttribute("data-price")); // Get price from data attribute
+            var totalPrice = document.getElementById("TotalPrice");
+
+            if (!checkIn || !checkOut || isNaN(price)) {
+                totalPrice.value = "";
+                return;
+            }
+
+
+            // Convert date strings to Date objects
+            var date1 = new Date(checkIn);
+            var date2 = new Date(checkOut);
+
+            // Calculate the difference in time and days
+            var diffTime = Math.abs(date2 - date1);
+            var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Convert to days
+
+            // Calculate the total price
+            totalPrice.value = diffDays * price;
+        }
+
+        // Attach event listeners
+        document.getElementById("CheckIn").addEventListener("change", calculateTotalPrice);
+        document.getElementById("CheckOut").addEventListener("change", calculateTotalPrice);
+        document.getElementById("RoomId").addEventListener("change", calculateTotalPrice);
+    </script>
+}
